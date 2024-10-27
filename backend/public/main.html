@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microfrontend App</title>
+  </head>
+  <style>
+    #content {
+      margin-left: 250px;
+      height: calc(100vh - 64px);
+    }
+  </style>
+  <body>
+    <!-- Navbar fragment -->
+    <div id="navbar" data-fragment="navbar"></div>
+    <div id="sidebar" data-fragment="sidebar"></div>
+
+    <!-- Main content section where microfrontends will load -->
+    <div id="content">
+      <!-- <div id="monitoring" data-fragment="monitoring"></div>
+      <div id="dashboard" data-fragment="dashboard"></div> -->
+    </div>
+
+    <!-- Load navbar's JavaScript -->
+    <script src="/navbar/main.js"></script>
+    <script src="/sidebar/main.js"></script>
+
+    <script>
+      // Dynamic Microfrontend Loader
+      let currentScript = null; // To track the currently loaded script
+
+      // Function to dynamically load a microfrontend
+      function loadMicrofrontend(name, scriptPath) {
+        // Clear previous content and unload previous script if any
+        const contentDiv = document.getElementById('content');
+        
+        contentDiv.innerHTML = '';
+
+        const fragmentDiv = document.createElement('div');
+        fragmentDiv.id = name;
+        fragmentDiv.setAttribute('data-fragment', name);
+
+        contentDiv.appendChild(fragmentDiv);
+
+        if (currentScript) {
+          document.body.removeChild(currentScript);
+          currentScript = null;
+        }
+
+        // Create a new script element for the selected microfrontend
+        const script = document.createElement('script');
+        script.src = scriptPath;
+
+        script.onload = () => {
+          console.log(`${name} microfrontend loaded.`);
+        };
+        script.onerror = () => {
+          console.error(`Failed to load the ${name} microfrontend.`);
+        };
+        
+        // Set current script for tracking and add to the document
+        currentScript = script;
+        document.body.appendChild(script);
+      }
+
+      // Event listeners for navigation clicks
+      document.addEventListener('DOMContentLoaded', () => {
+        const monitoringNavbarLink = document.getElementById('navbar-monitoring');
+        const monitoringSidebarLink = document.getElementById('sidebar-monitoring');
+        const dashboardNavbarLink = document.getElementById('navbar-dashboard');
+        const dashboardSidebarLink = document.getElementById('sidebar-dashboard');
+
+        if (monitoringNavbarLink) {
+          monitoringNavbarLink.addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent full page reload
+            loadMicrofrontend('monitoring', '/monitoring/main.js');
+          });
+        }
+
+        if (monitoringSidebarLink) {
+          monitoringSidebarLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadMicrofrontend('monitoring', '/monitoring/main.js');
+          });
+        }
+
+        if (dashboardNavbarLink) {
+          dashboardNavbarLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadMicrofrontend('dashboard', '/dashboard/main.js');
+          });
+        }
+
+        if (dashboardSidebarLink) {
+          dashboardSidebarLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadMicrofrontend('dashboard', '/dashboard/main.js');
+          });
+        }
+      });
+      
+      // Optionally, load a default view, like the dashboard
+      loadMicrofrontend('monitoring', '/monitoring/main.js');
+    </script>
+  </body>
+</html>
